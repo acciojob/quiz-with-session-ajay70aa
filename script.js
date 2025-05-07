@@ -1,7 +1,15 @@
-//your JS code here.
+const questionsElement = document.getElementById('questions')
+const submitBtn = document.getElementById('submit')
+const scoreElement = document.getElementById('score')
 
-// Do not change code below this line
-// This code will just display the questions to the screen
+let userAnswers = JSON.parse(sessionStorage.getItem("progress")) || []
+while (userAnswers.length < 5) userAnswers.push(null)
+
+const savedScore = localStorage.getItem("score");
+if (savedScore !== null) {
+  scoreElement.textContent = `Your score is ${savedScore} out of 5.`;
+}
+
 const questions = [
   {
     question: "What is the capital of France?",
@@ -32,6 +40,7 @@ const questions = [
 
 // Display the quiz questions and choices
 function renderQuestions() {
+  questionsElement.innerHTML = "";
   for (let i = 0; i < questions.length; i++) {
     const question = questions[i];
     const questionElement = document.createElement("div");
@@ -44,8 +53,12 @@ function renderQuestions() {
       choiceElement.setAttribute("name", `question-${i}`);
       choiceElement.setAttribute("value", choice);
       if (userAnswers[i] === choice) {
-        choiceElement.setAttribute("checked", true);
+        choiceElement.checked = true;
       }
+      choiceElement.addEventListener("change", () => {
+        userAnswers[i] = choice
+        sessionStorage.setItem("progress", JSON.stringify(userAnswers))
+      })
       const choiceText = document.createTextNode(choice);
       questionElement.appendChild(choiceElement);
       questionElement.appendChild(choiceText);
@@ -53,4 +66,17 @@ function renderQuestions() {
     questionsElement.appendChild(questionElement);
   }
 }
+
 renderQuestions();
+
+submitBtn.addEventListener("click", () => {
+  let score = 0;
+
+  for (let i = 0; i < questions.length; i++) {
+    if (userAnswers[i] === questions[i].answer) {
+      score++;
+    }
+  }
+  scoreElement.textContent = `Your score is ${score} out of 5.`;
+  localStorage.setItem("score", score.toString());
+});
